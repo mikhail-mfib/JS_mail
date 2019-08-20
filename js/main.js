@@ -1,59 +1,73 @@
-//заглушки (имитация базы данных)
-const image = 'https://placehold.it/200x150';
-const cartImage = 'https://placehold.it/100x80';
-const items = ['Notebook', 'Display', 'Keyboard', 'Mouse', 'Phones', 'Router', 'USB-camera', 'Gamepad'];
-const prices = [1000, 200, 20, 10, 25, 30, 18, 24];
-const ids = [1, 2, 3, 4, 5, 6, 7, 8];
-const API_URL = 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses';
+'use strict';
 
+const image = 'https://placehold.it/200x150',
+      cartImage = 'https://placehold.it/100x80',
+      API_URL = 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses';
 
-//глобальные сущности корзины и каталога (ИМИТАЦИЯ! НЕЛЬЗЯ ТАК ДЕЛАТЬ!)
-var userCart = [];
+//слушатели
+document.addEventListener('click', (evt) => {
+    if(!evt.target.closest('.btn-cart')) {
+        document.querySelector('.cart-block').classList.add('invisible');
+    }
 
-//кнопка скрытия и показа корзины
-document.querySelector('.btn-cart').addEventListener('click', () => {
-    document.querySelector('.cart-block').classList.toggle('invisible');
-});
+    if(evt.target.matches('.btn-cart')) {
+        document.querySelector('.cart-block').classList.toggle('invisible');
+    }
 
-document.querySelector('.products').addEventListener ('click', (evt) => {
-    if (evt.target.classList.contains ('buy-btn')) {
+    if (evt.target.matches('.buy-btn')) {
+        document.querySelector('.cart-block').classList.remove('invisible');
         cartBlock.addProduct(evt.target.dataset.name, evt.target.dataset.price);
     }
-});
 
-function makeGETRequest(url, callback) {
-    var xhr;
-  
-    if (window.XMLHttpRequest) {
-      xhr = new XMLHttpRequest();
-    } else if (window.ActiveXObject) {
-      xhr = new ActiveXObject("Microsoft.XMLHTTP");
+    if(evt.target.matches('.delete-btn')) {
+        document.querySelector('.cart-block').classList.remove('invisible');
+        cartBlock.deleteProduct(evt.target.parentNode);
     }
-  
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState === 4) {
-        callback(xhr.responseText);
-      }
-    };
-  
-    xhr.open('GET', url, true);
-    xhr.send();
-}
+});
 
 class ProductsList {
     constructor() {
         this.products = [];
+        this.fetchProducts();
     }
-    fetchProducts(cb) {
-        makeGETRequest(`${API_URL}/catalogData.json`, (goods) => {
-            this.products = JSON.parse(goods);
+    makeGETRequest(url) {
+        return new Promise((resolve, reject) => {
+            let xhr;
+      
+            if (window.XMLHttpRequest) {
+                xhr = new XMLHttpRequest();
+            } else if (window.ActiveXObject) {
+                xhr = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+        
+            xhr.open('GET', url, true);
+            xhr.addEventListener('readystatechange', () => {
+                if(xhr.readyState !== 4) {
+                    return;
+                }
+                if(xhr.status === 200) {
+                    resolve(xhr.responseText);
+                } else {
+                    reject(xhr.statusText);
+                }
+            });
+    
+            xhr.send();
         });
-        cb();
     }
-    render() {
+    fetchProducts() {
+        this.makeGETRequest(`${API_URL}/catalogData.json`)
+            .then((data) => {
+                this.products = JSON.parse(data);
+                return this.products;
+            })
+            .then(this.render)
+            .catch(err => console.error(err));
+    }
+    render(products) {
         let listHtml = '';
-        this.products.forEach(good => {
-          const goodItem = new Product(good);
+        products.forEach(good => {
+          const goodItem = new Product(good, image);
           listHtml += goodItem.render();
         });
         document.querySelector('.products').innerHTML = listHtml;
@@ -61,19 +75,22 @@ class ProductsList {
 }
 
 class Product {
-    constructor (product) {
+    constructor (product, image) {
         this.product_name = product.product_name;
         this.price = product.price;
+        this.img = image;
     }
     render() {
-        return `<div class="goods-item"><h3>${this.product_name}</h3><p>${this.price}</p></div>`;
+        return `<div class="product-item">
+                    <h3>${this.product_name}</h3>
+                    <img src='${this.img}'>
+                    <p>Цена: ${this.price}</p>
+                    <button class='buy-btn' data-name='${this.product_name}' data-price='${this.price}'>Купить</button>
+                </div>`;
     }
 }
 
 const catalog = new ProductsList();
-catalog.fetchProducts(() => {
-    catalog.render();
-});
 
 class Cart {
     constructor() {
@@ -83,14 +100,15 @@ class Cart {
         let newCartItem = new CartItem(name, price);
         this.render(newCartItem.render());
     }
+    deleteProduct(elem) {
+        elem.remove();
+    }
     render(item) {
         const cart = document.querySelector('.cart-block');
         cart.appendChild(item);
         this.num++;
     }
 }
-
-let cartBlock = new Cart(); 
 
 class CartItem {
     constructor(name, price) {
@@ -99,7 +117,10 @@ class CartItem {
     }
     render() {
         const block = document.createElement('div');
-        block.textContent = `${this.name}, ${this.price}`;
+        block.innerHTML = `<h3>${this.name}, ${this.price}</h3>
+                           <button class='delete-btn'>Удалить</button>`;
         return block;
     }
 }
+
+let cartBlock = new Cart(); 
