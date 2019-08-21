@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Regexp</title>
+    <style>
+        .err {
+            border: 1px solid red;
+        }
+    </style>
 </head>
 <body>
     <div class="regexp" style="width: 500px;">
@@ -28,6 +33,21 @@
             One: 'Sure. Bye.'
         </p>
     </div>
+
+    <form id="form" name="user_form">
+        <input id="name" type="text" name="user_name"
+            placeholder="Ваше имя">
+        <input id="phone" type="tel" name="user_phone"
+            placeholder="Номер телефона">
+        <input id="email" type="email" name="user_email"
+            placeholder="E-mail">
+        <input id="message" name="user_message"
+            placeholder="Ваше сообщение">
+        <div class="status"></div>
+        <div>
+            <button class="form-btn" type="submit">Оставить заявку!</button>
+        </div>
+    </form>
 <script src='script.js'></script>
 </body>
 </html>
