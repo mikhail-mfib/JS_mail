@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Интернет-магазин</title>
+
 </head>
 <body>
     <div id="app">
@@ -20,16 +21,7 @@
             </div>
         </header>
         <main>
-            <div class="products">
-                <div class="product-item" data-id="${this.id_product}" v-for="product of filtered">
-                    <img :src="imgCatalog" alt="Some img">
-                    <div class="desc">
-                        <h3> {{ product.product_name }}</h3>
-                        <p>{{ product.price }} $</p>
-                        <button class="buy-btn" @click="addProduct(product)">Купить</button>
-                    </div>
-                </div>
-            </div>
+            <products ref="products"></products>
         </main>
     </div>
 
