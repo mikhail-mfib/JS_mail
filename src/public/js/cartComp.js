@@ -5,7 +5,7 @@ const cartItem = {
                         <img :src="img" alt="Some img">
                         <div class="product-desc">
                             <p class="product-title"> {{ item.product_name }} </p>
-                            <p class="product-qugit init   antity">К-во: {{ item.quantity }} </p>
+                            <p class="product-quantity">К-во: {{ item.quantity }} </p>
                             <p class="product-single-price">$ {{ item.price }} each</p>
                         </div>
                     </div>
@@ -14,7 +14,7 @@ const cartItem = {
                         <button class="del-btn" @click="$root.$refs.cart.removeProduct(item)">&times;</button>
                     </div>
                 </div>`
-};
+}
 
 const cart = {
     data () {
@@ -24,26 +24,57 @@ const cart = {
             cartItems: [],
             shown: false,
             API_URL: 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses'
-        };
+        }
     },
     components: {
         'cart-item': cartItem
     },
     methods: {
         addProduct (product) {
-            console.log (`Product ${product.product_name} added`);
+           let find = this.cartItems.find ( el => el.id_product === product.id_product )
+
+           if (find) {
+            this.$parent.putJSON (`/api/cart/${find.id_product}`, {quantity: 1})
+                .then (data => {
+                    if (data.result) {
+                        find.quantity++
+                    }
+                })
+           } else {
+               let prod = Object.assign ({quantity: 1}, product)
+               this.$parent.postJSON (`/api/cart/`, prod)
+                .then (data => {
+                    if (data.result) {
+                        this.cartItems.push (prod)
+                    }
+            })
+           }
         },
         removeProduct (product) {
-            console.log (`Product ${product.product_name} removed`);
+            if (product.quantity > 1) {
+                this.$parent.putJSON (`/api/cart/${product.id_product}`, {quantity: -1})
+                .then (data => {
+                    if (data.result) {
+                        product.quantity--
+                    }
+                })
+            } else {
+                this.$parent.deleteJSON (`/api/cart/${product.id_product}`)
+                .then (data => {
+                    if (data.result) {
+                        this.cartItems.splice (this.cartItems.indexOf(product), 1)
+                    }
+                })
+            }
         }
     },
     mounted () {
-        this.$parent.getJSON (this.API_URL + this.cartUrl)
+        this.$parent.getJSON ('/api/cart')
 			.then (data => {
 				for (let el of data.contents) {
-					this.cartItems.push (el);
+					this.cartItems.push (el)
 				}
-			});
+			})
     },
     template: `
                 <div class="cart-wrap">
@@ -58,6 +89,6 @@ const cart = {
                         ></cart-item>
                     </div>
                 </div>`
-};
+}
 
-export default cart;
+export default cart

@@ -22,11 +22,11 @@ let products = {
             imgCatalog: 'https://placehold.it/200x150',
             catalogUrl: `/catalogData.json`,
             API_URL: 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses'
-        };
+        }
     },
     methods: {
         addProduct (product) {
-			this.$root.$refs.cart.addProduct(product);
+			this.$root.$refs.cart.addProduct (product) 
 		}
     },
     template: `
@@ -43,14 +43,14 @@ let products = {
         product
     },
     mounted () {
-        this.$parent.getJSON(`${this.API_URL + this.catalogUrl}`)
+        this.$parent.getJSON(`/api/products`)
 			.then (data => {
 				for (let el of data) {
-					this.products.push(el);
-					this.filtered.push(el);
+					this.products.push (el)
+					this.filtered.push (el)
 				}
-		});
+		})
     }
 }
 
-export default products;
+export default products
