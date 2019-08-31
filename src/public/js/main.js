@@ -1,5 +1,5 @@
-import cart from './cartComp'
-import products from './prodComp'
+import cart from './cartComp';
+import products from './prodComp';
 
 const API_URL = 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses';
 
@@ -63,16 +63,15 @@ let app = new Vue ({
 			this.filtered = this.products.filter (el => reg.test(el.product_name))
 		}
 	},
-	mounted () {
-		this.getJSON (`${API_URL + this.catalogUrl}`)
-			.then (data => {
-				for (let el of data) {
-					this.products.push (el)
-					this.filtered.push (el)
-				}
-			})
-	},
-	
-})
+	// mounted () {
+	// 	this.getJSON (`${API_URL + this.catalogUrl}`)
+	// 		.then (data => {
+	// 			for (let el of data) {
+	// 				this.products.push (el)
+	// 				this.filtered.push (el)
+	// 			}
+	// 		})
+	// }
+});
 
-export default app
+export default app;
